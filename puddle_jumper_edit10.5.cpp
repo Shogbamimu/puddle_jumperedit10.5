@@ -48,6 +48,7 @@ public:
 };
 
 class Graph {
+	
 	vector<Airport *> airports; // First variable in graph. Airport is vector. Holds pointer to all the airports. Want to iterate through all.  
 	int number_of_airports;
 
@@ -74,6 +75,7 @@ class Graph {
 	void dijkstra_for_cost(Airport * current_airport);
 	void dijkstra_for_time(Airport * current_airport);
 public:
+	enum searchTypes { price, distance, time };
 	// Search all airports and return the one with the same
 	// airport_code, or NULL if it's not found.
 	Airport * find(const string & airport_code)
@@ -118,9 +120,8 @@ public:
 			cout << i + 1 << ": " << airports[i]->airport_code << endl;
 	}
 
-	void find_cheapest(const string & leave, const string & arrive);
-	void find_shortest(const string & leave, const string & arrive);
-	void find_fastest(const string & leave, const string & arrive);
+	void find_flights(const string & leave, const string & arrive, searchTypes stype);
+
 };
 
 int main()
@@ -199,9 +200,10 @@ int main()
 	}
 	else
 	{
-		airport_graph.find_cheapest(depart, arrive);
-		airport_graph.find_shortest(depart, arrive);
-		airport_graph.find_fastest(depart, arrive);
+		airport_graph.find_flights(depart, arrive, Graph::searchTypes::price);
+		airport_graph.find_flights(depart, arrive, Graph::searchTypes::distance);
+		airport_graph.find_flights(depart, arrive, Graph::searchTypes::time);
+		
 	}
 
 	system("pause");
@@ -254,6 +256,8 @@ void Graph::dijkstra_init(Airport * start)
 		}
 	}
 }
+
+
 
 void Graph::dijkstra_for_distance(Airport * current_airport)
 {
@@ -376,42 +380,33 @@ void Graph::dijkstra_for_time(Airport * current_airport)
 }
 
 
-void Graph::find_cheapest(const string & leave, const string & arrive)
+
+void Graph::find_flights(const string & leave, const string & arrive, Graph::searchTypes stype)
 {
 	Airport * start = find(leave);
 	Airport * end = find(arrive);
-
 	dijkstra_init(start);
-	dijkstra_for_cost(start);
 
-	cout << endl << "Cheapest: $" << end->lowest_to_get_here << endl;
+	switch (stype)
+	{
+	case Graph::searchTypes::distance:
+		dijkstra_for_distance(start);
+		cout << endl << "Shortest: " << end->lowest_to_get_here << " miles" << endl;
+		break;
+
+	case Graph::searchTypes::price:
+		dijkstra_for_cost(start);
+		cout << endl << "Cheapest: $" << end->lowest_to_get_here << endl;
+		break;
+
+	case Graph::searchTypes::time:
+		dijkstra_for_time(start);
+		cout << endl << "Fastest" << endl;
+		break;
+	}
+
 	end->print_flight_path();
 }
-
-void Graph::find_shortest(const string & leave, const string & arrive)
-{
-	Airport * start = find(leave);
-	Airport * end = find(arrive);
-
-	dijkstra_init(start);
-	dijkstra_for_distance(start);
-
-	cout << endl << "Shortest: " << end->lowest_to_get_here << " miles" << endl;
-	end->print_flight_path();
-}
-
-void Graph::find_fastest(const string & leave, const string & arrive)
-{
-	Airport * start = find(leave);
-	Airport * end = find(arrive);
-
-	dijkstra_init(start);
-	dijkstra_for_time(start);
-
-	cout << endl << "Fastest" << endl;
-	end->print_flight_path();
-}
-
 
 void Airport::print_flight_path()
 {
@@ -446,3 +441,6 @@ void Airport::print_flight_path()
 		}
 	}
 }
+
+
+
