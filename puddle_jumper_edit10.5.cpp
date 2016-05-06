@@ -18,24 +18,26 @@ int calculate_minutes(int start, int end);
 // forward declaration so I can use this in Airport
 class Flight;
 
-class Airport /* vertex */ {
+class Airport /* vertex */
+{
 public:
 	// Constructor
-	Airport(const string & code) : airport_code(code) {} // only giving the cconstructor the airport code
+	Airport(const string & code) : airport_code(code) {} // Only giving the cconstructor the airport code
 
 	string airport_code;
 
 	// Dijkstra algorithm variables
 	bool visited;
-	double lowest_to_get_here; // used for distance, cost, and time
-	vector<Flight *> flight_path; // flight path to reach this airport
+	double lowest_to_get_here; // Used for distance, cost, and time
+	vector<Flight *> flight_path; // Flight path to reach this airport
 
 	vector<Flight *> outbound_fights;
 
 	void print_flight_path();
 };
 
-class Flight /* edge */ {
+class Flight /* edge */
+{
 public:
 	string from_to;
 	int timeLeave;
@@ -47,23 +49,24 @@ public:
 	Airport * destination;
 };
 
-class Graph {
-	
-	vector<Airport *> airports; // First variable in graph. Airport is vector. Holds pointer to all the airports. Want to iterate through all.  
-	int number_of_airports;
+class Graph
+{
+	vector<Airport *> airports; /* First variable in graph. Airport is vector. Holds pointer to
+								all the airports. Want to iterate through all*/
 
-	/**
-	* Returns existing airport or creates new one and returns that
-	* if the airport doesn't already exist
-	*/
+
+								/**
+								* Returns existing airport or creates new one and returns that
+								* if the airport doesn't already exist
+								*/
 	Airport * get_airport(const string & airport_code)
 	{
-		Airport * airport = find(airport_code);
+		Airport * airport = find(airport_code); // Tries to find airport object
 
-		// If airport isn't found, create one and add it to the vector
+												// If airport isn't found, create one and add it to the vector
 		if (airport == NULL)
 		{
-			airport = new Airport(airport_code);
+			airport = new Airport(airport_code); // Creates the airport object
 			airports.push_back(airport);
 		}
 
@@ -75,9 +78,11 @@ class Graph {
 	void dijkstra_for_cost(Airport * current_airport);
 	void dijkstra_for_time(Airport * current_airport);
 public:
+
 	enum searchTypes { price, distance, time };
-	// Search all airports and return the one with the same
-	// airport_code, or NULL if it's not found.
+
+	/* Search all airports and return the one with the same
+	airport_code, or NULL if it's not found*/
 	Airport * find(const string & airport_code)
 	{
 		for (int i = 0; i < airports.size(); i++)
@@ -86,17 +91,19 @@ public:
 		return NULL;
 	}
 
-	// Creates a flight and adds it to the vector of outbound flights
-	// in the departure airport.  If an airport doesn't exist it is
-	// created here and added to the Graphs's airport vector.  The flight
-	// contains the departure and arrival airport, the departure and
-	// arrival time, the cost, and the distance.  For convenience it also
-	// has a string for the flight and the minutes.
-	void add_flight(string depart, string arrive,
+	/* Creates a flight and adds it to the vector of outbound flights
+	in the departure airport.  If an airport doesn't exist it is
+	created here and added to the Graphs's airport vector.  The flight
+	contains the departure and arrival airport, the departure and
+	arrival time, the cost, and the distance.  For convenience it also
+	has a string for the flight and the minutes.*/
+	void add_flight(string depart, string arrive, // Graph normally has a list of vertex and node
 		int timeLeave, int timeArrive,
 		int distance, double cost)
 	{
-		Airport * depart_airport = get_airport(depart);
+
+		Airport * depart_airport = get_airport(depart); // Finds the depart airport and returns it to depart airport. 
+														// Will assign airport that already exists or the one we created
 		Airport * arrive_airport = get_airport(arrive);
 
 		Flight * flight = new Flight();
@@ -109,19 +116,18 @@ public:
 		flight->source = depart_airport;
 		flight->destination = arrive_airport;
 
-		depart_airport->outbound_fights.push_back(flight);
+		depart_airport->outbound_fights.push_back(flight); // Pushes list of outbound flights to airport
 	}
 
-	// Lists the airport codes so the user knows what codes are 
-	// available
+	// Lists the airport codes so the user knows what codes are available
 	void print_codes()
 	{
-		for (int i = 0; i < airports.size(); i++)
-			cout << i + 1 << ": " << airports[i]->airport_code << endl;
+		for (int i = 0; i < airports.size(); i++) // Looping through each airport and printing out each node
+			cout << i + 1 << ": " << airports[i]->airport_code << endl; // airports[i] gives pointer to airport
 	}
 
-	void find_flights(const string & leave, const string & arrive, searchTypes stype);
 
+	void find_flights(const string & leave, const string & arrive, searchTypes stype);
 };
 
 int main()
@@ -129,15 +135,16 @@ int main()
 	Graph airport_graph;
 
 	// Try to open the file
-	string flights;
-	ifstream file("puddle jumper.csv");
-	if (!file.is_open())
+	string flights; // Holds the line that it reads in from file
+	ifstream file("puddle jumper.csv"); /*File is opened within constructor for file, constructor opens file.
+										ifstream will open the file when the constructor is called*/
+	if (!file.is_open()) // Makes sure the file is open
 	{
 		cout << "Couldn't open the file" << endl;
 		return 0;
 	}
 
-	// skip the header
+	// Skip the header
 	getline(file, flights);
 
 	// process each flight in the CSV file
@@ -176,7 +183,7 @@ int main()
 	string depart;
 	string arrive;
 
-	airport_graph.print_codes();
+	airport_graph.print_codes(); // airport_graph is graph that knows about all the airports
 
 	cout << "Enter Departure Airport:   ";
 	cin >> depart;
@@ -184,26 +191,26 @@ int main()
 	cout << "Enter Destination Airport: ";
 	cin >> arrive;
 
-	// force both airiport codes to upper-case
+	// Force both airiport codes to upper-case
 	for (int i = 0; i < depart.size(); i++) depart[i] = toupper(depart[i]);
 	for (int i = 0; i < arrive.size(); i++) arrive[i] = toupper(arrive[i]);
 
 	if (!airport_graph.find(depart))
 	{
 		cout << "Couldn't find departure airport." << endl;
-		cout << "Don't know airport with code '" << depart << "'" << endl;
+		cout << "There's no airport with code '" << depart << "'" << endl;
 	}
 	else if (!airport_graph.find(arrive))
 	{
 		cout << "Couldn't find arrival airport." << endl;
-		cout << "Don't know airport with code '" << arrive << "'" << endl;
+		cout << "There's no airport with code '" << arrive << "'" << endl;
 	}
 	else
 	{
+		 // Will find and print path
 		airport_graph.find_flights(depart, arrive, Graph::searchTypes::price);
 		airport_graph.find_flights(depart, arrive, Graph::searchTypes::distance);
 		airport_graph.find_flights(depart, arrive, Graph::searchTypes::time);
-		
 	}
 
 	system("pause");
@@ -212,13 +219,13 @@ int main()
 
 int calculate_minutes(int start, int end)
 {
-	// separate the hours and minutes from the time integers
+	// Separate the hours and minutes from the time integers
 	int start_hour = start / 100;
 	int start_minute = start % 100;
 	int end_hour = end / 100;
 	int end_minute = end % 100;
 
-	// if start is greater than the end time then midnight is crossed.
+	// If start is greater than the end time then midnight is crossed.
 	if (start > end)
 	{
 		// Calculate minutes until midnight + minutes after midnight
@@ -236,13 +243,14 @@ int calculate_minutes(int start, int end)
 }
 
 
-void Graph::dijkstra_init(Airport * start)
+void Graph::dijkstra_init(Airport * start) /* Initializes the starting point to zero, then every other node
+										   gets initialized to maximum value for a double */
 {
-	for (int i = 0; i < airports.size(); i++)
+	for (int i = 0; i < airports.size(); i++) // airports.size = number of airports
 	{
 		// Mark all airports as unvisited
 		airports[i]->visited = false;
-		airports[i]->flight_path.clear();
+		airports[i]->flight_path.clear(); // Flight to get there plus cost and distance
 
 		if (airports[i] == start)
 		{
@@ -256,8 +264,6 @@ void Graph::dijkstra_init(Airport * start)
 		}
 	}
 }
-
-
 
 void Graph::dijkstra_for_distance(Airport * current_airport)
 {
@@ -401,7 +407,7 @@ void Graph::find_flights(const string & leave, const string & arrive, Graph::sea
 
 	case Graph::searchTypes::time:
 		dijkstra_for_time(start);
-		cout << endl << "Fastest" << endl;
+		cout << endl << "Fastest: " << end->lowest_to_get_here << " minutes" << endl;
 		break;
 	}
 
@@ -441,6 +447,3 @@ void Airport::print_flight_path()
 		}
 	}
 }
-
-
-
