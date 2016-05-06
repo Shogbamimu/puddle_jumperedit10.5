@@ -79,8 +79,8 @@ public:
 	Airport * find(const string & airport_code)
 	{
 		for (int i = 0; i < airports.size(); i++)
-		if (airports[i]->airport_code == airport_code)
-			return airports[i];
+			if (airports[i]->airport_code == airport_code)
+				return airports[i];
 		return NULL;
 	}
 
@@ -128,7 +128,7 @@ int main()
 	Graph airport_graph;
 
 	// Try to open the file
-	string line;
+	string flights;
 	ifstream file("puddle jumper.csv");
 	if (!file.is_open())
 	{
@@ -137,35 +137,39 @@ int main()
 	}
 
 	// skip the header
-	getline(file, line);
+	getline(file, flights);
 
 	// process each flight in the CSV file
-	while (getline(file, line))
+	while (file.peek() != EOF)
 	{
-#ifdef _WIN32
-		char * p;
-		string depart = strtok_s((char*)line.c_str(), ",", &p);
-		string arrive = strtok_s(NULL, ",", &p);
+		file >> flights;
+		int pos = 0;
+		int count = 0;
+		string depart, arrive = "";
+		int timeLeave, timeArrive, distance = 0;
+		double price = 0;
 
-		int timeLeave = atoi(strtok_s(NULL, ",", &p));
-		int timeArrive = atoi(strtok_s(NULL, ",", &p));
-		int distance = atoi(strtok_s(NULL, ",", &p));
-		double price = strtod(strtok_s(NULL, "\r\n", &p), NULL);
-#else
-		string depart = strtok((char*)line.c_str(), ",");
-		string arrive = strtok(NULL, ",");
+		int delimiterPos[5];
+		for (int i = 0; i < flights.length(); i++)
+		{
+			if (flights[i] == ',')
+			{
+				delimiterPos[count++] = pos;
+			}
+			pos++;
+		}
 
-		int timeLeave = atoi(strtok(NULL, ","));
-		int timeArrive = atoi(strtok(NULL, ","));
-		int distance = atoi(strtok(NULL, ","));
-		double price = strtod(strtok(NULL, "\r\n"), NULL);
-#endif
-		airport_graph.add_flight(depart, arrive, timeLeave, timeArrive,
-			distance, price);
+		depart = flights.substr(0, delimiterPos[0]);
+		arrive = flights.substr(delimiterPos[0] + 1, (delimiterPos[1] - delimiterPos[0] - 1));
+		timeLeave = stoi(flights.substr(delimiterPos[1] + 1, (delimiterPos[2] - delimiterPos[1] - 1)));
+		timeArrive = stoi(flights.substr(delimiterPos[2] + 1, (delimiterPos[3] - delimiterPos[2] - 1)));
+		distance = stoi(flights.substr(delimiterPos[3] + 1, (delimiterPos[4] - delimiterPos[3] - 1)));
+		price = stod(flights.substr(delimiterPos[4] + 1, (delimiterPos[5] - delimiterPos[4] - 1)));
+
+		airport_graph.add_flight(depart, arrive, timeLeave, timeArrive, distance, price);
 	}
 
 	file.close();
-
 
 
 	string depart;
@@ -371,6 +375,7 @@ void Graph::dijkstra_for_time(Airport * current_airport)
 	}
 }
 
+
 void Graph::find_cheapest(const string & leave, const string & arrive)
 {
 	Airport * start = find(leave);
@@ -441,6 +446,3 @@ void Airport::print_flight_path()
 		}
 	}
 }
-
-
-
